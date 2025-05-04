@@ -1,0 +1,334 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dake Liu - Personal Website</title>
+    <style>
+        /* Basic styling for the entire page */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            line-height: 1.6;
+            color: #333;
+        }
+
+        /* Header styling */
+        header {
+            background-color: #333;
+            color: white;
+            padding: 1rem;
+            position: fixed;
+            width: 100%;
+            top: 0;
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            justify-content: center;
+        }
+
+        nav ul li {
+            margin: 0 1rem;
+        }
+
+        nav ul li a {
+            color: white;
+            text-decoration: none;
+        }
+
+        nav ul li a:hover {
+            color: #ddd;
+        }
+
+        /* Hero section styling */
+        .hero {
+            background-image: url('https://media.gettyimages.com/id/1025971138/photo/sturgeon-moon-over-cornell.jpg?s=612x612&w=0&k=20&c=eABePS_3LqQv_I78_5vndLDwuc2jaxUTiCgGWSrRe-k='); /* Change to your background image */
+            background-size: cover;
+            background-position: center;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            color: white;
+        }
+
+        .hero-content img {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            margin-bottom: 1rem;
+            border: 3px solid white;
+        }
+
+        /* Main content sections */
+        main {
+            margin-top: 60px; /* Adjust for fixed header */
+        }
+
+        section {
+            padding: 2rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        h2 {
+            margin-bottom: 1rem;
+            color: #333;
+        }
+
+        /* About section */
+        #about p {
+            margin-bottom: 1rem;
+        }
+
+        /* Skills section */
+        #skills ul {
+            list-style: none;
+            padding: 0;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        #skills ul li {
+            margin: 0.5rem;
+            background: #f4f4f4;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+        }
+
+        /* Experience and Education sections */
+        .job, .education-item {
+            margin-bottom: 1.5rem;
+            text-align: left;
+        }
+
+        .job h3, .education-item h3 {
+            margin-bottom: 0.5rem;
+        }
+
+        /* Projects section */
+        .project-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .project-card {
+            background-color: #f9f9f9;
+            padding: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            text-align: left;
+        }
+
+        .project-card a {
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        .project-card a:hover {
+            text-decoration: underline;
+        }
+
+        /* Contact section */
+        #contact p {
+            margin: 0.5rem 0;
+        }
+
+        /* Footer styling */
+        footer {
+            background-color: #333;
+            color: white;
+            text-align: center;
+            padding: 1rem;
+            width: 100%;
+        }
+
+        /* Responsive design */
+        @media (max-width: 600px) {
+            nav ul {
+                flex-direction: column;
+            }
+
+            nav ul li {
+                margin: 0.5rem 0;
+            }
+
+            .hero-content img {
+                width: 120px;
+                height: 120px;
+            }
+
+            section {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header with navigation -->
+    <header>
+        <nav>
+            <ul>
+                <li><a href="#home">Home</a></li>
+                <li><a href="#about">About</a></li>
+                <li><a href="#skills">Skills</a></li>
+                <li><a href="#experience">Experience</a></li>
+                <li><a href="#education">Education</a></li>
+                <li><a href="#projects">Projects</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Hero section -->
+    <section id="home" class="hero">
+        <div class="hero-content">
+            <!-- Change 'path/to/your/profile-picture.jpg' to the path of your profile picture -->
+            <img src="/Users/liudake/Desktop/1c94d98b051febd8fb47f4a1a2c7dfcb.jpg" alt="Dake Liu">
+            <!-- Change 'Your Name' to your actual name -->
+            <h1>Dake Liu</h1>
+            <!-- Change 'Your Title' to your actual title (e.g., "Web Developer", "Student") -->
+            <p>System Engineering
+            Cornell University 2025
+            </p>
+        </div>
+    </section>
+
+    <!-- Main content -->
+    <main>
+        <!-- About section -->
+        <section id="about">
+            <h2>About Me</h2>
+            <!-- Write a brief bio about yourself here -->
+            <p>Hi, I'm Dake Liu. I am someone who loves video games, spending time with animals, and exploring how data can tell a story. I have two dogs and four cats, and theyr ae a big part of my daily life. I had internships in business and data analytics, and I really enjoyed it—it helped me discover how much I like working with numbers and turning information into insights.</p>
+            <p>Feel free to reach out to learn more about me!</p>
+        </section>
+
+        <!-- Skills section -->
+        <section id="skills">
+            <h2>Skills</h2>
+            <ul>
+                <!-- Add your skills here -->
+                <li>Advanced Python</li>
+                <li>Intermediate Java</li>
+                <li>Chinese: Native</li>
+            </ul>
+        </section>
+
+        <!-- Experience section -->
+        <section id="experience">
+            <h2>Experience</h2>
+            <!-- Add your work experiences here -->
+            <div class="job">
+                <h3>Business Analytic Intern</h3>
+                <p>Edgedevice.ai</p>
+                <p>Jul. 2023 - Aug. 2023</p>
+                <p>Conducted research on the AI edge device market, cloud computing trends, and IoT technologies to help the company
+                    understand industry trends and potential opportunities.</p>
+            </div>
+            <!-- Add more jobs as needed -->
+        </section>
+
+        <!-- Education section -->
+        <section id="education">
+            <h2>Education</h2>
+            <!-- Add your educational background here -->
+            <div class="education-item">
+                <h3>Bachelor of Science in Economics</h3>
+                <p>University of Wisconsin-Madison</p>
+                <p>Sep. 2022 - May. 2024</p>
+                <h3>Master in System Engineering </h3>
+                <p>Cornell University</p>
+                <p>Aug. 2024 - May. 2025</p>
+            </div>
+            
+            <!-- Add more education items as needed -->
+        </section>
+
+        <!-- Projects section -->
+        <section id="projects">
+            <h2>Projects</h2>
+            <div class="project-grid">
+                <!-- Add your projects here -->
+                <div class="project-card">
+                    <h3>The Impact of Sports Events on Subway in NYC</h3>
+                    <p>Executed an in-depth study to measure the impact of game-day activities of prominent New York sports teams (Yankees,
+                        Knicks, & Rangers) on local transportation, revealing a 25-30% increase in passenger flow at adjacent subway stations
+                        during event days.</p>
+                    <p>Utilized Python for sophisticated data analysis, correlating sports events with a notable surge in public transportation
+                        usage, and identified peak hours with a 40% increase in subway traffic during major games.</p>
+                    <p>Leveraged ArcGIS to create visualizations, showcasing the spatial impact of sports events on transit systems with heat
+                        maps and foot traffic flow charts, offering a clear, quantifiable representation of data trends and anomalies.</p>
+                    <!-- Update with your project link -->
+                    <a href="https://example.com">View Project</a>
+                </div>
+                <!-- Add more project cards as needed -->
+            </div>
+        </section>
+
+        <!-- Contact section -->
+        <section id="contact">
+            <h2>Contact</h2>
+            <!-- Add your contact information here -->
+            <p>Email: dakeliu2002@gmail.com</p>
+            <p>Phone: (608)-960-3992</p>
+            <!-- Update with your social media links -->
+            <p><a href="https://www.linkedin.com/in/dake-liu-a01b92318/">LinkedIn</a> | <a href="https://github.com/dl2249">GitHub</a></p>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2025 Dake Liu. All rights reserved.</p>
+    </footer>
+</body>
+</html>
