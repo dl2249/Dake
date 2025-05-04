@@ -1,0 +1,214 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Impact of Sports Events on NYC Subway</title>
+    <!-- Bootstrap CSS for responsive design -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Animate.css for animations -->
+    <link href="https://cdn.jsdelivr.net/npm/animate.css@4.1.1/animate.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+        }
+        header {
+            background: linear-gradient(135deg, #003087 0%, #ff6200 100%); /* NYC subway-inspired gradient */
+            color: white;
+            padding: 3rem 0;
+            text-align: center;
+        }
+        nav {
+            background-color: #333;
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        nav ul {
+            list-style: none;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+        }
+        nav ul li {
+            margin: 0 1.5rem;
+        }
+        nav ul li a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        nav ul li a:hover {
+            color: #ff6200;
+        }
+        section {
+            padding: 3rem 2rem;
+            margin: 2rem auto;
+            max-width: 900px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        h2 {
+            color: #003087;
+            margin-bottom: 1.5rem;
+        }
+        .visualization {
+            margin: 2rem 0;
+        }
+        footer {
+            background-color: #333;
+            color: white;
+            text-align: center;
+            padding: 1.5rem;
+        }
+        /* Animation for section fade-in */
+        section {
+            animation: fadeInUp 1s ease-in-out;
+        }
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        /* Responsive design */
+        @media (max-width: 768px) {
+            nav ul {
+                flex-direction: column;
+                text-align: center;
+            }
+            nav ul li {
+                margin: 0.5rem 0;
+            }
+            section {
+                padding: 2rem 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <h1 class="display-4 animate__animated animate__fadeIn">The Impact of Sports Events on NYC Subway</h1>
+        <p class="lead">Exploring how major sports events influence subway ridership in New York City</p>
+    </header>
+
+    <!-- Navigation -->
+    <nav>
+        <ul>
+            <li><a href="#intro">Introduction</a></li>
+            <li><a href="#data">Data Sources</a></li>
+            <li><a href="#analysis">Analysis</a></li>
+            <li><a href="#visualizations">Visualizations</a></li>
+            <li><a href="#conclusion">Conclusion</a></li>
+        </ul>
+    </nav>
+
+    <!-- Main Content -->
+    <main>
+        <!-- Introduction -->
+        <section id="intro" class="animate__animated animate__fadeInUp">
+            <h2>Introduction</h2>
+            <p> Subways provide critical transportation services for New York City. They provide approximately 3.2 million rides per day serving as the most used mode of transportation in the city. It provides an essential role for people living in the city enabling them to commute to work, home, school, and other events. Subways are also the cornerstone of the New York economy, providing consumers to businesses and workers to jobs on a daily basis. With close to 500 stations in NYC, ridership was around 1 billion in 2022. This makes New York City a very accessible city with a booming economy. People travel for a multitude of reasons every single day, but event driven ridership is a major phenomenon that we will be addressing in the paper. The concept of event-driven ridership indicates that during major events such as sports games in NYC, which attract large numbers of people traveling to one given place, there is an increased use of transportation. In our studies, we have seen this increase. We have studied ridership data and compared it to times and days where there are games for teams in the three major sports. We have looked at the New York Knicks, Rangers, and Yankees. The purpose of this analysis is to show how sports affects event driven ridership in NYC and see specifically the differences on days where games are played versus days where no games are played. It is important for city planners, stadium management, and subway riders to understand the trends that are shown in order to prepare for future scenarios. We will address our methodology, data and visualization analysis, results, implications and conclusions.</p>
+        </section>
+
+        <!-- Data Sources -->
+        <section id="data" class="animate__animated animate__fadeInUp">
+            <h2>Data Visualizations</h2>
+            <!-- Customize with your data sources -->
+            <p>
+                - <strong>Sports Event Schedules</strong>: Collected from public sources for NYC teams including the Yankees, Mets, Knicks, and others.<br>
+                - <strong>Subway Ridership Data</strong>: Hourly data from the MTA, available at <a href="https://data.ny.gov/Transportation/MTA-Subway-Hourly-Ridership-2020-2024/wujg-7c2s">data.ny.gov</a>.
+            </p>
+        </section>
+
+        <!-- Analysis -->
+        <section id="analysis" class="animate__animated animate__fadeInUp">
+            <h2>Analysis</h2>
+            <!-- Customize with your analysis methodology -->
+            <p>
+                We aligned sports event schedules with hourly subway ridership data to identify usage spikes around game times. Key methods included:<br>
+                - Comparing ridership on event days vs. non-event days.<br>
+                - Analyzing stations near stadiums (e.g., Yankee Stadium, Madison Square Garden) for significant changes.
+            </p>
+        </section>
+
+        <!-- Visualizations -->
+        <section id="visualizations" class="animate__animated animate__fadeInUp">
+            <h2>Visualizations</h2>
+            <!-- Embed your Datawrapper or other visualizations here -->
+            <div class="visualization">
+                <p><strong>Subway Usage During Sports Events</strong></p>
+                <!-- Replace with your Datawrapper iframe -->
+                <img src="https://www.datawrapper.de/_/your-chart-id/" width="100%" height="400" frameborder="0"></iframe>
+            </div>
+            <!-- Add more visualizations as needed -->
+        </section>
+
+        <!-- Conclusion -->
+        <section id="conclusion" class="animate__animated animate__fadeInUp">
+            <h2>Conclusion</h2>
+            <!-- Customize with your findings -->
+            <p>
+                Our analysis suggests that sports events significantly increase subway ridership, particularly around game times and near event venues. These findings highlight the critical role of public transportation in supporting large-scale events in NYC.
+            </p>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <!-- Customize with your contact info -->
+        <p>Contact: your.email@example.com | Data Source: <a href="https://data.ny.gov/Transportation/MTA-Subway-Hourly-Ridership-2020-2024/wujg-7c2s">MTA Ridership</a></p>
+    </footer>
+
+    <!-- Bootstrap JS for interactivity -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
